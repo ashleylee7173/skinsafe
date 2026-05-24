@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skinsafe — Ingredient Checker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #FAF8F4;
+    --warm-white: #FFFFF8;
+    --blush: #F5EDE8;
+    --blush-mid: #E8D5CC;
+    --rose: #C0796A;
+    --rose-dark: #8B4E42;
+    --charcoal: #2C2420;
+    --text-mid: #6B5B55;
+    --text-light: #9E8E89;
+    --green: #4A7C6A;
+    --green-light: #EAF3EE;
+    --red-light: #FCECEA;
+    --red: #C0453A;
+    --amber-light: #FDF4E7;
+    --amber: #B07820;
+    --border: rgba(44, 36, 32, 0.12);
+    --radius: 12px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--charcoal);
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  nav {
+    background: var(--warm-white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    color: var(--rose-dark);
+    letter-spacing: -0.02em;
+    text-decoration: none;
+  }
+
+  .logo span { color: var(--charcoal); font-style: italic; }
+
+  nav p {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* HERO */
+  .hero {
+    background: var(--warm-white);
+    text-align: center;
+    padding: 4rem 1.5rem 3rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero-eyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--rose);
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+  }
+
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    line-height: 1.1;
+    color: var(--charcoal);
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .hero h1 em { color: var(--rose); font-style: italic; }
+
+  .hero p {
+    font-size: 1rem;
+    color: var(--text-mid);
+    max-width: 520px;
+    margin: 0 auto;
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  /* MAIN LAYOUT */
+  .main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  @media (max-width: 700px) {
+    .main { grid-template-columns: 1fr; }
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+  }
+
+  .card-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-light);
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .card-label .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--rose);
+    flex-shrink: 0;
+  }
+
+  .card h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    color: var(--charcoal);
+    margin-bottom: 0.75rem;
+  }
+
+  /* TEXTAREA */
+  textarea {
+    width: 100%;
+    height: 160px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    color: var(--charcoal);
+    background: var(--cream);
+    resize: vertical;
+    line-height: 1.6;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  textarea:focus { border-color: var(--rose); }
+  textarea::placeholder { color: var(--text-light); }
+
+  /* BUTTONS */
+  .btn-row {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 0.85rem;
+  }
+
+  .btn-primary {
+    flex: 1;
+    background: var(--rose);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1.25rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .btn-primary:hover { background: var(--rose-dark); }
+  .btn-primary:active { transform: scale(0.98); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-mid);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-ghost:hover { background: var(--blush); }
+
+  /* CUSTOM TRIGGERS */
+  .trigger-input-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .trigger-input-row input {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 0.85rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    color: var(--charcoal);
+    background: var(--cream);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .trigger-input-row input:focus { border-color: var(--rose); }
+  .trigger-input-row input::placeholder { color: var(--text-light); }
+
+  .btn-add {
+    background: var(--blush);
+    color: var(--rose-dark);
+    border: 1px solid var(--blush-mid);
+    border-radius: 8px;
+    padding: 0.6rem 0.9rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-add:hover { background: var(--blush-mid); }
+
+  /* TRIGGER TAGS */
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    min-height: 32px;
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: var(--blush);
+    color: var(--rose-dark);
+    border: 1px solid var(--blush-mid);
+    border-radius: 100px;
+    padding: 0.3rem 0.65rem 0.3rem 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+
+  .tag-x {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--rose);
+    font-size: 0.85rem;
+    line-height: 1;
+    padding: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .tag-x:hover { color: var(--rose-dark); }
+
+  .tags-empty {
+    font-size: 0.82rem;
+    color: var(--text-light);
+    font-style: italic;
+  }
+
+  /* RESULTS */
+  .results-card {
+    grid-column: 1 / -1;
+    display: none;
+  }
+
+  .results-card.visible { display: block; }
+
+  .results-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  @media (max-width: 500px) {
+    .results-summary { grid-template-columns: 1fr; }
+  }
+
+  .stat {
+    text-align: center;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  .stat-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+  }
+
+  .stat-safe { background: var(--green-light); }
+  .stat-safe .stat-num { color: var(--green); }
+  .stat-safe .stat-label { color: var(--green); }
+
+  .stat-pore { background: var(--red-light); }
+  .stat-pore .stat-num { color: var(--red); }
+  .stat-pore .stat-label { color: var(--red); }
+
+  .stat-trigger { background: var(--amber-light); }
+  .stat-trigger .stat-num { color: var(--amber); }
+  .stat-trigger .stat-label { color: var(--amber); }
+
+  /* VERDICT BANNER */
+  .verdict {
+    border-radius: 8px;
+    padding: 0.85rem 1.1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .verdict-clear { background: var(--green-light); color: var(--green); border: 1px solid #b2d9c7; }
+  .verdict-pore { background: var(--red-light); color: var(--red); border: 1px solid #f0b8b5; }
+  .verdict-trigger { background: var(--amber-light); color: var(--amber); border: 1px solid #dfc07a; }
+  .verdict-both { background: var(--red-light); color: var(--red); border: 1px solid #f0b8b5; }
+
+  /* INGREDIENT PILLS */
+  .section-title {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+    color: var(--text-light);
+    margin-bottom: 0.6rem;
+    margin-top: 1rem;
+  }
+
+  .section-title:first-of-type { margin-top: 0; }
+
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .pill {
+    border-radius: 100px;
+    padding: 0.3rem 0.85rem;
+    font-size: 0.82rem;
+    font-weight: 400;
+    border: 1px solid;
+  }
+
+  .pill-pore {
+    background: var(--red-light);
+    color: var(--red);
+    border-color: #f0b8b5;
+  }
+
+  .pill-trigger {
+    background: var(--amber-light);
+    color: var(--amber);
+    border-color: #dfc07a;
+  }
+
+  .pill-safe {
+    background: var(--green-light);
+    color: var(--green);
+    border-color: #b2d9c7;
+  }
+
+  .pill-neutral {
+    background: var(--blush);
+    color: var(--text-mid);
+    border-color: var(--blush-mid);
+  }
+
+  /* LEGEND */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    color: var(--text-mid);
+  }
+
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* COMEDOGENIC LIST */
+  .full-list {
+    grid-column: 1 / -1;
+    margin-top: 1rem;
+  }
+
+  .list-toggle {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.65rem 1rem;
+    width: 100%;
+    text-align: left;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    color: var(--text-mid);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s;
+  }
+
+  .list-toggle:hover { background: var(--blush); }
+  .list-toggle span { font-size: 0.75rem; color: var(--text-light); }
+
+  .list-content {
+    display: none;
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 1.25rem;
+    columns: 3;
+    column-gap: 1.5rem;
+  }
+
+  @media (max-width: 600px) { .list-content { columns: 2; } }
+
+  .list-content.open { display: block; }
+
+  .list-content p {
+    font-size: 0.8rem;
+    color: var(--text-mid);
+    line-height: 1.8;
+    break-inside: avoid;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-light);
+    line-height: 1.8;
+  }
+
+  footer strong { color: var(--text-mid); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="#">skin<span>safe</span></a>
+  <p>Ingredient Checker</p>
+</nav>
+
+<div class="hero">
+  <p class="hero-eyebrow">Free · No signup required</p>
+  <h1>Know what's <em>really</em><br>in your skincare</h1>
+  <p>Paste any ingredient list to instantly check for pore-clogging comedogenic ingredients — plus flag your own personal triggers.</p>
+</div>
+
+<div class="main">
+
+  <!-- PASTE INGREDIENTS -->
+  <div class="card">
+    <div class="card-label"><span class="dot"></span> Step 1</div>
+    <h2>Paste Ingredients</h2>
+    <p style="font-size:0.83rem; color:var(--text-light); margin-bottom:0.85rem; line-height:1.6;">Google your product name + "ingredients" and paste the full list below.</p>
+    <textarea id="ingredientInput" placeholder="e.g. Water, Glycerin, Niacinamide, Centella Asiatica Extract, Sodium Hyaluronate, Cetearyl Alcohol, Dimethicone..."></textarea>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="runCheck()">Check ingredients</button>
+      <button class="btn-ghost" onclick="clearAll()">Clear</button>
+    </div>
+  </div>
+
+  <!-- PERSONAL TRIGGERS -->
+  <div class="card">
+    <div class="card-label"><span class="dot"></span> Step 2 · Optional</div>
+    <h2>Your Personal Triggers</h2>
+    <p style="font-size:0.83rem; color:var(--text-light); margin-bottom:0.85rem; line-height:1.6;">Add ingredients that break you out. We'll flag them separately from the comedogenic list.</p>
+    <div class="trigger-input-row">
+      <input type="text" id="triggerInput" placeholder="e.g. centella asiatica" onkeydown="if(event.key==='Enter') addTrigger()" />
+      <button class="btn-add" onclick="addTrigger()">+ Add</button>
+    </div>
+    <div class="tags" id="tagsList">
+      <span class="tags-empty" id="tagsEmpty">No personal triggers added yet.</span>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="card results-card" id="resultsCard">
+    <div class="card-label"><span class="dot"></span> Results</div>
+    <div id="verdict" class="verdict"></div>
+    <div class="results-summary">
+      <div class="stat stat-pore">
+        <div class="stat-num" id="statPore">0</div>
+        <div class="stat-label">Pore-cloggers</div>
+      </div>
+      <div class="stat stat-trigger">
+        <div class="stat-num" id="statTrigger">0</div>
+        <div class="stat-label">Your triggers</div>
+      </div>
+      <div class="stat stat-safe">
+        <div class="stat-num" id="statSafe">0</div>
+        <div class="stat-label">Looks safe</div>
+      </div>
+    </div>
+
+    <div id="poreSection" style="display:none">
+      <div class="section-title">🚫 Pore-clogging ingredients found</div>
+      <div class="pills" id="porePills"></div>
+    </div>
+
+    <div id="triggerSection" style="display:none">
+      <div class="section-title">⚠️ Your personal triggers found</div>
+      <div class="pills" id="triggerPills"></div>
+    </div>
+
+    <div id="safeSection" style="display:none">
+      <div class="section-title">✓ Safe ingredients (sample)</div>
+      <div class="pills" id="safePills"></div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Pore-clogging</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Your personal trigger</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Not flagged</div>
+    </div>
+  </div>
+
+  <!-- FULL COMEDOGENIC LIST -->
+  <div class="full-list">
+    <button class="list-toggle" onclick="toggleList(this)">
+      View full list of comedogenic ingredients
+      <span id="listToggleLabel">Show ↓</span>
+    </button>
+    <div class="list-content" id="fullList"></div>
+  </div>
+
+</div>
+
+<footer>
+  <strong>Skinsafe</strong> — built for acne-prone skin 🌿<br>
+  Comedogenic ratings are based on established research. Individual reactions vary — always patch test.<br>
+  Not a substitute for professional dermatological advice.
+</footer>
+
+<script>
+const COMEDOGENIC = [
+  "1-acetoxyhexadecane","1-hexadecanol acetate","acetylated lanolin alcohol","acetylated wool fat","acetylated wool wax","agar","algae","algae bladderwrack","algae extract","algea","algin","alginate","alginic acid","almond oil","andiroba seed oil","apricot kernel oil","apricot oil","arthrospira platensis","ascophyllum","ascophyllum nodosum","ascophyllum nodosum extract","avocado butter","avokado oil","babassu oil","beef tallow","bismuth","bismuth oxychloride","black kelp","bladderwrack","blue algae","blue green algae","borage oil","brazil nut oil","brown algae","buriti oil","butyl stearate","butyl stearic acid","butyrospermum","butyrospermum parkii","cacao butter","cacao seed butter","canola oil","carageenan","caragenan","carrageenan","carrageenan gum","carrageenan moss","carragenan","carrot seed oil","cetearyl alcohol + ceteareth 20","cetearyl alcohol + ceteareth-20","cetyl acetate","cherry seed oil","chlorella","chlorella vulgaris extract","chlorophyceae","chondrus crispus","chondrus crispus powder","chullu seed oil","coal tar","cocoa seed butter","coconut","coconut alkanes","coconut butter","coconut extract","coconut fruit extract","cocos","cocos nucifera","cocos nucifera seed butter","colloidal sulfur","corn oil","cotton seed oil","cranberry seed oil","d&c red 17","d&c red 21","d&c red 3","d&c red 30","d&c red 36","decyl oleate","dioctyl succinate","disodium laureth sulfosuccinate","disodium monooleamido","disodium monooleamido peg-2 sulfosuccinate","disodium oleamido peg-2 sulfosuccinate","dodecanoic acid","dodecoic acid","dodecyl acid","dulse","dunaliella salina extract","duodecylic acid","ecklonia","ecklonia cava","ecklonia cava extract","ethoxylated lanolin","ethylhexyl palmitate","ethylhexyl stearate","evening primrose oil","flax oil","flaxseed oil","fucoxanthin","fucus serratus","fucus vesiculosus","glyceryl 3 diisostearate","glyceryl-3 diisostearate","glycine max","glycine soja oil","haematococcus pluvialis","haematococcus pluvialis extract","hexadecanol acetate","hexadecyl alcohol","hydrogenated castor oil","hydrogenated vegetable oil","hydrolyzed rhodophyceae extract","hypnea musciformis extract","irish moss","isocetyl alcohol","isocetyl stearate","isodecyl oleate","isooctadecyl isooctadecanoate","isopalmitic alcohol","isopalmityl alcohol","isopropyl isodecanoate","isopropyl isostearate","isopropyl lanolate","isopropyl linoleate","isostearyl isostearate","isostearyl neopentanoate","jojoba butter","kapok oil","karite","kelp","laminaria","laminaria digitata","laminaria digitata extract","laminaria longicruris","laminaria saccharina","laminaria saccharina extract","lanolic acid","lanolin acetate","lanolin alcohol","lanolin polyoxyethylene ether","laureth 23","laureth 4","laureth-23","laureth-4","lauric acid","laurostearic acid","lauryl sulfate","linolate","linseed oil","linum usitatissimum seed oil","macroalgae","magnesium myristate","mahua seed oil","marine algae","marula","marula oil","mink oil","monostearate","moringa oil","moringa oleifera seed oil","myreth-3 myristate","myristate","myristic acid","myristyl","myristyl alcohol","myristyl lactate","myristyl propianate","myristyl propionate","n-hexadecyl ethanoate","octadecyl heptanoate","olea europaea fruit oil","oleth 3","oleth-3","olive butter","olive oil peg-7 esters","palash oil","palm butter","palm kernel oil","palm oil","palmaria palmata","palmitic acid","palmityl acetate","palmityl alcohol","papaya seed oil","parkii","parkii butter","parkii oil","peanut oil","peg 16 lanolin","peg-16 lanolin","peg-40 hydrogenated castor oil","pine nut oil","plankton","plankton extract","polyglyceryl-diisostearate","porphyra","porphyra umbilicalis","porphyridium","porphyridium cruentum","porphyridium cruentum extract","potassium chloride","pouteria sapota seed butter","ppg 2 myristyl ether propionate","ppg 2 myristyl propionate","ppg-2 myristyl","ppg-2 myristyl propionate","propylene glycol monostearate","rapeseed oil","red algae","red palm oil","rhodophyceae extract","rhodophyta","rockweed","sargassum","sclerocarya birrea","sclerocarya birrea seed oil","seaweed","sesame oil","sesame seed","sesamum indicum","shark liver oil","shark squalene","shea","shea nut oil","sheep alcohol","sles","slo","sls","sodium alginate","sodium dodecyl sulfate","sodium laureth sulfate","sodium lauryl ether sulfate","sodium lauryl sulfate","solulan 16","sorbitan oleate","soybean","soybean oil","spirulina","squalene","steareth 10","steareth-10","stearic acid tea","stearyl heptanoate","sulfated castor oil","sunflower butter","sweet almond butter","sweet almond oil","tallow","tetradecyl myristate","theobroma butter","theobroma cocoa seed butter","theobroma oil","triticum aestivum","triticum vulgare","tucuma butter","turkey red oil","ulva lactuca","undaria","undaria pinnatifida","vitamin e oil","vitellaria paradoxa","wakame","wheat germ acid","wheat germ glyceride","wheat germ oil","wool alcohol","wool fat","xylene","zea mays","zea mays (corn) oil"
+];
+
+let personalTriggers = [];
+
+function normalizeIngredient(s) {
+  return s.toLowerCase().replace(/[^a-z0-9\s\-\+&]/g, '').trim();
+}
+
+function parseIngredients(raw) {
+  return raw.split(/[,\n]+/).map(s => s.trim()).filter(s => s.length > 1);
+}
+
+function addTrigger() {
+  const input = document.getElementById('triggerInput');
+  const val = input.value.trim();
+  if (!val) return;
+  const norm = normalizeIngredient(val);
+  if (personalTriggers.includes(norm)) { input.value = ''; return; }
+  personalTriggers.push(norm);
+  renderTags();
+  input.value = '';
+  input.focus();
+}
+
+function removeTrigger(norm) {
+  personalTriggers = personalTriggers.filter(t => t !== norm);
+  renderTags();
+}
+
+function renderTags() {
+  const list = document.getElementById('tagsList');
+  const empty = document.getElementById('tagsEmpty');
+  list.innerHTML = '';
+  if (personalTriggers.length === 0) {
+    list.appendChild(Object.assign(document.createElement('span'), { className: 'tags-empty', id: 'tagsEmpty', textContent: 'No personal triggers added yet.' }));
+    return;
+  }
+  personalTriggers.forEach(t => {
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.innerHTML = `${t} <button class="tag-x" onclick="removeTrigger('${t}')" aria-label="Remove ${t}">✕</button>`;
+    list.appendChild(tag);
+  });
+}
+
+function runCheck() {
+  const raw = document.getElementById('ingredientInput').value;
+  if (!raw.trim()) return;
+  const ingredients = parseIngredients(raw);
+
+  const poreFound = [];
+  const triggerFound = [];
+  const safeFound = [];
+
+  ingredients.forEach(ing => {
+    const norm = normalizeIngredient(ing);
+    const isComedogenic = COMEDOGENIC.some(c => norm.includes(c) || c.includes(norm));
+    const isTrigger = personalTriggers.some(t => norm.includes(t) || t.includes(norm));
+
+    if (isComedogenic) poreFound.push(ing);
+    else if (isTrigger) triggerFound.push(ing);
+    else safeFound.push(ing);
+
+    if (isTrigger && !triggerFound.includes(ing)) triggerFound.push(ing);
+  });
+
+  const uniqueTrigger = triggerFound.filter(t => !poreFound.includes(t));
+
+  document.getElementById('statPore').textContent = poreFound.length;
+  document.getElementById('statTrigger').textContent = uniqueTrigger.length;
+  document.getElementById('statSafe').textContent = safeFound.length;
+
+  const verdict = document.getElementById('verdict');
+  const hasPore = poreFound.length > 0;
+  const hasTrigger = uniqueTrigger.length > 0;
+
+  if (!hasPore && !hasTrigger) {
+    verdict.className = 'verdict verdict-clear';
+    verdict.textContent = '✓ No pore-cloggers or personal triggers detected — this product looks safe for your skin.';
+  } else if (hasPore && hasTrigger) {
+    verdict.className = 'verdict verdict-both';
+    verdict.textContent = `⚠ Found ${poreFound.length} pore-clogging ingredient${poreFound.length>1?'s':''} and ${uniqueTrigger.length} of your personal trigger${uniqueTrigger.length>1?'s':''}. Proceed with caution.`;
+  } else if (hasPore) {
+    verdict.className = 'verdict verdict-pore';
+    verdict.textContent = `🚫 Found ${poreFound.length} pore-clogging ingredient${poreFound.length>1?'s':''} in this product.`;
+  } else {
+    verdict.className = 'verdict verdict-trigger';
+    verdict.textContent = `⚠ Found ${uniqueTrigger.length} of your personal trigger ingredient${uniqueTrigger.length>1?'s':''}.`;
+  }
+
+  function renderPills(arr, type, containerId, sectionId) {
+    const section = document.getElementById(sectionId);
+    const container = document.getElementById(containerId);
+    if (arr.length === 0) { section.style.display = 'none'; return; }
+    section.style.display = 'block';
+    container.innerHTML = arr.map(i => `<span class="pill pill-${type}">${i}</span>`).join('');
+  }
+
+  renderPills(poreFound, 'pore', 'porePills', 'poreSection');
+  renderPills(uniqueTrigger, 'trigger', 'triggerPills', 'triggerSection');
+
+  const safeSection = document.getElementById('safeSection');
+  const safePills = document.getElementById('safePills');
+  const safeSample = safeFound.slice(0, 12);
+  if (safeSample.length > 0) {
+    safeSection.style.display = 'block';
+    safePills.innerHTML = safeSample.map(i => `<span class="pill pill-safe">${i}</span>`).join('');
+    if (safeFound.length > 12) safePills.innerHTML += `<span class="pill pill-neutral">+${safeFound.length - 12} more</span>`;
+  } else {
+    safeSection.style.display = 'none';
+  }
+
+  const resultsCard = document.getElementById('resultsCard');
+  resultsCard.classList.add('visible');
+  resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function clearAll() {
+  document.getElementById('ingredientInput').value = '';
+  document.getElementById('resultsCard').classList.remove('visible');
+}
+
+function toggleList(btn) {
+  const list = document.getElementById('fullList');
+  const label = document.getElementById('listToggleLabel');
+  if (!list.innerHTML) {
+    list.innerHTML = COMEDOGENIC.map(i =>
+      `<p>${i.replace(/\b\w/g, c => c.toUpperCase())}</p>`
+    ).join('');
+  }
+  list.classList.toggle('open');
+  label.textContent = list.classList.contains('open') ? 'Hide ↑' : 'Show ↓';
+}
+</script>
+</body>
+</html>
